@@ -1,26 +1,25 @@
 # Blueprint Render — Auto-École Lambaréné
-# Plan Starter (disque persistant obligatoire : le free tier n'a PAS de disque,
-# la base SQLite serait effacée à chaque redémarrage).
+# Plan GRATUIT (free) : pas de disque persistant → la base SQLite est éphémère et
+# remise à zéro à chaque redémarrage/veille. L'app se re-seed automatiquement au
+# démarrage (admin + données de démo), donc elle reste fonctionnelle comme DÉMO.
+# ➡️ Pour conserver les données réelles, passer en plan `starter` + bloc `disk`
+#    (voir docs/MIGRATION_RENDER_PAYANT.md).
 services:
   - type: web
     name: auto-ecole-lambarene
     runtime: node
-    plan: starter
+    plan: free
     region: frankfurt
     branch: main
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/sante
     autoDeploy: true
-    disk:
-      name: donnees
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
       - key: DB_PATH
-        value: /var/data/autoecole.db
+        value: ./data/autoecole.db   # éphémère sur le free tier (pas de disque)
       - key: JWT_SECRET
         generateValue: true          # généré une fois par Render
       - key: ADMIN_EMAIL
