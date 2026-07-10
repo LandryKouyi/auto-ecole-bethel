@@ -1,0 +1,20 @@
+{
+  "name": "auto-ecole-lambarene",
+  "version": "1.0.0",
+  "description": "Application de gestion pour auto-école à Lambaréné (Gabon) — élèves, moniteurs, véhicules, leçons, paiements, examens.",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "author": "Pasteur Landry",
+  "license": "UNLICENSED"
+}

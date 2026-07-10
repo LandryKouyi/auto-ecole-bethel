@@ -1,0 +1,36 @@
+# Blueprint Render — Auto-École Lambaréné
+# Plan Starter (disque persistant obligatoire : le free tier n'a PAS de disque,
+# la base SQLite serait effacée à chaque redémarrage).
+services:
+  - type: web
+    name: auto-ecole-lambarene
+    runtime: node
+    plan: starter
+    region: frankfurt
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/sante
+    autoDeploy: true
+    disk:
+      name: donnees
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: DB_PATH
+        value: /var/data/autoecole.db
+      - key: JWT_SECRET
+        generateValue: true          # généré une fois par Render
+      - key: ADMIN_EMAIL
+        sync: false                  # à saisir dans le dashboard Render
+      - key: ADMIN_PASSWORD
+        sync: false                  # à saisir dans le dashboard Render (secret)
+      - key: PUBLIC_URL
+        sync: false                  # ex: https://auto-ecole-lambarene.onrender.com
+      # --- E-Billing / SHAP (Mobile Money Gabon) : à saisir quand disponible ---
+      - key: EBILLING_USERNAME
+        sync: false
+      - key: EBILLING_SHARED_KEY
+        sync: false

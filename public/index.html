@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auto-École Lambaréné — Gestion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marine: { 700: '#1e3a5f', 800: '#172e4d', 900: '#10203a' },
+            brand: { DEFAULT: '#1d4ed8', 600: '#2563eb', 700: '#1d4ed8' },
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>" />
+  <style>
+    [x-cloak]{display:none}
+    .nav-active{background:#1d4ed8;color:#fff}
+    body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+  <!-- ÉCRAN DE CONNEXION -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div class="text-center mb-6">
+        <div class="text-5xl mb-2">🚗</div>
+        <h1 class="text-2xl font-bold text-marine-800">Auto-École Lambaréné</h1>
+        <p class="text-slate-500 text-sm mt-1">Espace de gestion</p>
+      </div>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Email</label>
+          <input name="email" type="email" required value="admin@autoecole.ga"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand outline-none" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Mot de passe</label>
+          <input name="password" type="password" required value="admin2026"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand outline-none" />
+        </div>
+        <p id="login-error" class="text-red-600 text-sm hidden"></p>
+        <button type="submit"
+          class="w-full bg-brand hover:bg-brand-700 text-white font-semibold py-2.5 rounded-lg transition">
+          Se connecter
+        </button>
+      </form>
+      <p class="text-xs text-slate-400 mt-6 text-center">
+        Démo — admin@autoecole.ga / admin2026<br>moniteur : jean.ndong@autoecole.ga / moniteur2026
+      </p>
+    </div>
+  </div>
+
+  <!-- APPLICATION -->
+  <div id="app" class="hidden min-h-screen md:flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-marine-900 text-slate-200 w-64 flex-shrink-0 md:min-h-screen
+           fixed md:static inset-y-0 left-0 z-30 -translate-x-full md:translate-x-0 transition-transform">
+      <div class="p-5 border-b border-white/10 flex items-center gap-2">
+        <span class="text-2xl">🚗</span>
+        <div>
+          <div class="font-bold leading-tight">Auto-École</div>
+          <div class="text-xs text-slate-400">Lambaréné</div>
+        </div>
+      </div>
+      <nav id="nav" class="p-3 space-y-1 text-sm"></nav>
+      <div class="p-3 mt-auto absolute bottom-0 w-full border-t border-white/10">
+        <div id="user-box" class="text-xs text-slate-400 mb-2 px-2"></div>
+        <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-sm">
+          ⎋ Déconnexion
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenu -->
+    <div class="flex-1 md:ml-0 min-w-0">
+      <header class="bg-white shadow-sm sticky top-0 z-20 flex items-center justify-between px-4 py-3">
+        <div class="flex items-center gap-3">
+          <button id="menu-btn" class="md:hidden text-2xl">☰</button>
+          <h2 id="page-title" class="text-lg font-bold text-marine-800">Tableau de bord</h2>
+        </div>
+        <div id="header-actions"></div>
+      </header>
+      <main id="view" class="p-4 md:p-6 max-w-7xl mx-auto"></main>
+    </div>
+  </div>
+
+  <!-- Modale générique -->
+  <div id="modal-backdrop" class="hidden fixed inset-0 bg-black/40 z-40 flex items-start justify-center overflow-y-auto p-4">
+    <div id="modal" class="bg-white rounded-xl shadow-2xl w-full max-w-lg my-8"></div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-white text-sm"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
