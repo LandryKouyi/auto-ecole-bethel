@@ -1,7 +1,7 @@
 {
-  "name": "auto-ecole-lambarene",
+  "name": "auto-ecole-bethel",
   "version": "1.0.0",
-  "description": "Application de gestion pour auto-école à Lambaréné (Gabon) — élèves, moniteurs, véhicules, leçons, paiements, examens.",
+  "description": "Application de gestion de l'Auto-École Béthel (Lambaréné, Gabon) — élèves, moniteurs, véhicules, leçons, paiements, examens.",
   "type": "module",
   "main": "server.js",
   "engines": {

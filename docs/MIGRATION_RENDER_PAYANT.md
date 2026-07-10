@@ -21,9 +21,9 @@ ainsi.
 cd "Documents/Claude/Projects/Auto-Ecole-Lambarene"
 git init
 git add .
-git commit -m "Auto-École Lambaréné — MVP"
+git commit -m "Auto-École Béthel — MVP"
 # Créez un repo (public ou privé) puis :
-git remote add origin https://github.com/<votre-compte>/auto-ecole-lambarene.git
+git remote add origin https://github.com/<votre-compte>/auto-ecole-bethel.git
 git branch -M main
 git push -u origin main
 ```
@@ -31,10 +31,10 @@ git push -u origin main
 ## Étape B — Créer le service sur Render (Blueprint)
 
 1. Render → **New** → **Blueprint** → connectez le repo GitHub.
-2. Render lit `render.yaml` et propose le service `auto-ecole-lambarene` (Starter + disque).
+2. Render lit `render.yaml` et propose le service `auto-ecole-bethel` (plan gratuit par défaut).
 3. Renseignez les variables marquées `sync: false` :
    - `ADMIN_EMAIL`, `ADMIN_PASSWORD` (choisissez un mot de passe fort)
-   - `PUBLIC_URL` = `https://auto-ecole-lambarene.onrender.com` (adaptez au nom réel)
+   - `PUBLIC_URL` = `https://auto-ecole-bethel.onrender.com` (adaptez au nom réel)
    - `EBILLING_USERNAME`, `EBILLING_SHARED_KEY` (quand vous les avez de Digitech Africa)
 4. `JWT_SECRET` est généré automatiquement par Render.
 5. **Create** → Render build (`npm install`) puis lance (`npm start`).

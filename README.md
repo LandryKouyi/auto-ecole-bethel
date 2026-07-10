@@ -1,6 +1,6 @@
-# 🚗 Auto-École Lambaréné — Application de gestion
+# 🚗 Auto-École Béthel — Application de gestion
 
-Application web de gestion complète pour une auto-école à Lambaréné (Gabon) :
+Application web de gestion complète pour l'**Auto-École Béthel** à Lambaréné (Gabon) :
 élèves, moniteurs, véhicules, leçons, paiements et examens, avec tableau de bord.
 
 ## Stack

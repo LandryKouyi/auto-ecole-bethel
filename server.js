@@ -1,4 +1,4 @@
-// Auto-École Lambaréné — serveur Express + node:sqlite.
+// Auto-École Béthel — serveur Express + node:sqlite.
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -53,4 +53,4 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 ensureSeed(); // crée l'admin + jeu de démo si base vide
-app.listen(PORT, () => console.log(`Auto-École Lambaréné en écoute sur http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Auto-École Béthel en écoute sur http://localhost:${PORT}`));

@@ -1,4 +1,4 @@
-# Blueprint Render — Auto-École Lambaréné
+# Blueprint Render — Auto-École Béthel
 # Plan GRATUIT (free) : pas de disque persistant → la base SQLite est éphémère et
 # remise à zéro à chaque redémarrage/veille. L'app se re-seed automatiquement au
 # démarrage (admin + données de démo), donc elle reste fonctionnelle comme DÉMO.
@@ -6,7 +6,7 @@
 #    (voir docs/MIGRATION_RENDER_PAYANT.md).
 services:
   - type: web
-    name: auto-ecole-lambarene
+    name: auto-ecole-bethel
     runtime: node
     plan: free
     region: frankfurt
@@ -27,7 +27,7 @@ services:
       - key: ADMIN_PASSWORD
         sync: false                  # à saisir dans le dashboard Render (secret)
       - key: PUBLIC_URL
-        sync: false                  # ex: https://auto-ecole-lambarene.onrender.com
+        sync: false                  # ex: https://auto-ecole-bethel.onrender.com
       # --- E-Billing / SHAP (Mobile Money Gabon) : à saisir quand disponible ---
       - key: EBILLING_USERNAME
         sync: false

@@ -1,4 +1,4 @@
-/* Auto-École Lambaréné — application frontend (vanilla JS). */
+/* Auto-École Béthel — application frontend (vanilla JS). */
 'use strict';
 
 const API = '/api';
@@ -453,7 +453,8 @@ window.recu = async (id) => {
     <div class="p-6" id="recu-print">
       <div class="text-center border-b pb-3 mb-3">
         <div class="text-2xl">🚗</div>
-        <div class="font-bold text-marine-800">AUTO-ÉCOLE LAMBARÉNÉ</div>
+        <div class="font-bold text-marine-800">AUTO-ÉCOLE BÉTHEL</div>
+        <div class="text-xs text-slate-500">Lambaréné</div>
         <div class="text-xs text-slate-500">Reçu de paiement N°${p.id}</div>
       </div>
       <table class="w-full text-sm">

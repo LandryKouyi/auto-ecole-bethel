@@ -1,4 +1,4 @@
-# Guide moniteur — Auto-École Lambaréné
+# Guide moniteur — Auto-École Béthel
 
 Ce guide s'adresse aux **moniteurs** (rôle `moniteur`).
 

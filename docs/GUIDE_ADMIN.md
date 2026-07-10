@@ -1,4 +1,4 @@
-# Guide administrateur — Auto-École Lambaréné
+# Guide administrateur — Auto-École Béthel
 
 Ce guide s'adresse au **gestionnaire** de l'auto-école (rôle `admin`).
 
