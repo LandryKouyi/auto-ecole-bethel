@@ -129,6 +129,21 @@ CREATE INDEX IF NOT EXISTS idx_audit_date   ON audit_log(created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action);
 CREATE INDEX IF NOT EXISTS idx_audit_cible  ON audit_log(cible_table, cible_id);
 
+-- Prospects : demandes de pré-inscription reçues via la landing page publique.
+CREATE TABLE IF NOT EXISTS prospects (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom          TEXT NOT NULL DEFAULT '',
+  prenom       TEXT NOT NULL DEFAULT '',
+  telephone    TEXT NOT NULL DEFAULT '',
+  formule      TEXT NOT NULL DEFAULT '',            -- forfait souhaité (libellé libre)
+  message      TEXT NOT NULL DEFAULT '',
+  statut       TEXT NOT NULL DEFAULT 'nouveau',      -- nouveau | contacte | converti | perdu
+  source       TEXT NOT NULL DEFAULT 'landing',
+  eleve_id     INTEGER,                              -- rempli si converti en élève
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_prospects_statut ON prospects(statut);
+
 -- Clôture de caisse : rapprochement quotidien cash théorique ↔ cash physique déclaré.
 CREATE TABLE IF NOT EXISTS cloture_caisse (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,

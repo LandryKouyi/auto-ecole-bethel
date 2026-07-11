@@ -15,6 +15,7 @@ import examensRoutes from './src/routes/examens.js';
 import dashboardRoutes from './src/routes/dashboard.js';
 import caisseRoutes from './src/routes/caisse.js';
 import auditRoutes from './src/routes/audit.js';
+import prospectsRoutes from './src/routes/prospects.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -44,10 +45,15 @@ app.use('/api/examens', examensRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/caisse', caisseRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/prospects', prospectsRoutes);
 
-// Frontend statique
-app.use(express.static(join(__dirname, 'public')));
-app.get('*', (req, res) => res.sendFile(join(__dirname, 'public', 'index.html')));
+// Frontend : landing publique sur '/', application de gestion sur '/app'.
+const PUBLIC = join(__dirname, 'public');
+app.get('/', (req, res) => res.sendFile(join(PUBLIC, 'accueil.html')));
+app.get(['/app', '/app/*'], (req, res) => res.sendFile(join(PUBLIC, 'index.html')));
+app.use(express.static(PUBLIC, { index: false }));
+// Toute autre URL inconnue → page publique (vitrine par défaut).
+app.get('*', (req, res) => res.sendFile(join(PUBLIC, 'accueil.html')));
 
 // Gestion d'erreurs JSON
 app.use((err, req, res, next) => {

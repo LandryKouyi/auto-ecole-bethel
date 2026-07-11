@@ -109,6 +109,7 @@ function formModal(titre, champs, valeurs, onSubmit) {
 /* ---------- Navigation ---------- */
 const SECTIONS = [
   { id: 'dashboard', label: 'Tableau de bord', icon: '📊', roles: ['admin', 'moniteur'] },
+  { id: 'prospects', label: 'Prospects', icon: '📥', roles: ['admin'] },
   { id: 'eleves', label: 'Élèves', icon: '🎓', roles: ['admin', 'moniteur'] },
   { id: 'moniteurs', label: 'Moniteurs', icon: '👨‍🏫', roles: ['admin'] },
   { id: 'vehicules', label: 'Véhicules', icon: '🚙', roles: ['admin'] },
@@ -540,6 +541,45 @@ window.formExamen = async (id) => {
 window.notifierExamen = async (id) => {
   const r = await api('/examens/' + id + '/notifier');
   window.open(r.link, '_blank');
+};
+
+/* ---------- Prospects (demandes issues de la landing page) ---------- */
+RENDER.prospects = async () => {
+  const list = await api('/prospects');
+  const nouveaux = list.filter((p) => p.statut === 'nouveau').length;
+  const rows = list.map((p) => `<tr class="hover:bg-slate-50">
+    <td class="px-4 py-2 whitespace-nowrap text-xs">${fmtDate(p.created_at)}</td>
+    <td class="px-4 py-2 font-medium">${esc(p.prenom)} ${esc(p.nom)}</td>
+    <td class="px-4 py-2">${esc(p.telephone)}</td>
+    <td class="px-4 py-2">${esc(p.formule || '—')}</td>
+    <td class="px-4 py-2 text-slate-500 text-xs max-w-xs truncate" title="${esc(p.message)}">${esc(p.message || '')}</td>
+    <td class="px-4 py-2">${badge(p.statut)}</td>
+    <td class="px-4 py-2 text-right whitespace-nowrap">
+      <a href="${p.whatsapp}" target="_blank" class="text-emerald-600 hover:underline">💬</a>
+      ${p.statut === 'nouveau' ? `· <button onclick="statutProspect(${p.id},'contacte')" class="text-brand hover:underline">Contacté</button>` : ''}
+      ${p.statut !== 'converti' ? `· <button onclick="convertirProspect(${p.id})" class="text-marine-800 font-medium hover:underline">Convertir</button>` : ''}
+      ${p.statut !== 'perdu' && p.statut !== 'converti' ? `· <button onclick="statutProspect(${p.id},'perdu')" class="text-slate-400 hover:underline">Perdu</button>` : ''}
+    </td></tr>`).join('');
+  $('#view').innerHTML = `
+    <div class="grid grid-cols-2 gap-4 mb-6 max-w-md">
+      ${card('Demandes reçues', list.length, null, 'brand')}
+      ${card('Nouvelles à traiter', nouveaux, null, nouveaux ? 'orange' : 'emerald')}
+    </div>
+    <p class="text-sm text-slate-500 mb-3">Demandes de pré-inscription envoyées depuis la page d'accueil publique. « Convertir » crée automatiquement la fiche élève.</p>
+    ${tableWrap(['Date', 'Nom', 'Téléphone', 'Forfait', 'Message', 'Statut', ''], rows)}`;
+};
+
+window.statutProspect = async (id, statut) => {
+  try { await api('/prospects/' + id + '/statut', { method: 'PUT', body: { statut } });
+    toast('Statut mis à jour'); go('prospects');
+  } catch (e) { toast(e.message, false); }
+};
+
+window.convertirProspect = async (id) => {
+  if (!confirm('Créer une fiche élève à partir de ce prospect ?')) return;
+  try { await api('/prospects/' + id + '/convertir', { method: 'POST' });
+    toast('Prospect converti en élève ✓'); go('prospects');
+  } catch (e) { toast(e.message, false); }
 };
 
 /* ---------- Impayés (contrat pédagogique : dû − payé) ---------- */

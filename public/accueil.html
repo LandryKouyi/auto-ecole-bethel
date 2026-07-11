@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auto-École Béthel — Permis de conduire à Lambaréné</title>
+  <meta name="description" content="Auto-École Béthel à Lambaréné : formation au code et à la conduite, moniteurs agréés, forfaits clairs. Pré-inscrivez-vous en ligne." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: {
+      marine: { 700: '#1e3a5f', 800: '#172e4d', 900: '#10203a' },
+      brand: { DEFAULT: '#1d4ed8', 600: '#2563eb', 700: '#1d4ed8' },
+      or: { DEFAULT: '#c8922a', 600: '#b17f22' },
+      creme: '#f5f0e8',
+    } } } };
+  </script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>" />
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    .hero-grad { background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(200,146,42,.25), transparent 60%),
+      linear-gradient(135deg, #10203a 0%, #1e3a5f 100%); }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+
+  <!-- Barre de navigation -->
+  <header class="sticky top-0 z-40 bg-marine-900/95 backdrop-blur text-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2 font-bold">
+        <span class="text-2xl">🚗</span>
+        <span>Auto-École Béthel <span class="text-or font-normal text-sm hidden sm:inline">· Lambaréné</span></span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-slate-200">
+        <a href="#forfaits" class="hover:text-or">Forfaits</a>
+        <a href="#atouts" class="hover:text-or">Pourquoi nous</a>
+        <a href="#etapes" class="hover:text-or">Comment ça marche</a>
+        <a href="#inscription" class="bg-or hover:bg-or-600 text-marine-900 font-semibold px-4 py-2 rounded-lg">Pré-inscription</a>
+      </nav>
+      <a href="#inscription" class="md:hidden bg-or text-marine-900 font-semibold px-3 py-1.5 rounded-lg text-sm">S'inscrire</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="top" class="hero-grad text-white">
+    <div class="max-w-6xl mx-auto px-4 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="inline-block bg-white/10 border border-white/15 text-or text-xs font-semibold px-3 py-1 rounded-full mb-5">Permis catégorie B · Code & Conduite</span>
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight">Passez votre permis en toute confiance à Lambaréné</h1>
+        <p class="mt-5 text-lg text-slate-200 max-w-xl">Moniteurs agréés, véhicules entretenus, suivi personnalisé et forfaits clairs. De l'inscription à l'examen, nous vous accompagnons à chaque étape.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#inscription" class="bg-or hover:bg-or-600 text-marine-900 font-semibold px-6 py-3 rounded-xl shadow-lg">Je me pré-inscris</a>
+          <a href="#forfaits" class="border border-white/25 hover:bg-white/10 px-6 py-3 rounded-xl font-semibold">Voir les forfaits</a>
+        </div>
+        <div class="mt-8 flex gap-8 text-sm">
+          <div><div class="text-2xl font-bold text-or">100%</div><div class="text-slate-300">Moniteurs agréés</div></div>
+          <div><div class="text-2xl font-bold text-or">Code + Conduite</div><div class="text-slate-300">Formation complète</div></div>
+          <div><div class="text-2xl font-bold text-or">Suivi</div><div class="text-slate-300">personnalisé</div></div>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur">
+          <div class="text-7xl text-center mb-4">🚗</div>
+          <div class="text-center text-slate-200">« On vous forme jusqu'à la réussite. »</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORFAITS -->
+  <section id="forfaits" class="max-w-6xl mx-auto px-4 py-20">
+    <div class="text-center mb-3"><span class="text-or font-semibold text-sm">NOS FORFAITS</span></div>
+    <h2 class="text-3xl font-bold text-center text-marine-800">Des tarifs clairs, sans surprise</h2>
+    <p class="text-center text-slate-500 mt-2">Tarifs indicatifs en FCFA — à confirmer au bureau selon votre situation.</p>
+    <div class="grid md:grid-cols-4 gap-5 mt-10">
+      <!-- Inscription -->
+      <div class="rounded-2xl border border-slate-200 p-6 flex flex-col">
+        <div class="text-3xl">📝</div>
+        <h3 class="font-bold text-lg mt-3 text-marine-800">Inscription</h3>
+        <p class="text-sm text-slate-500 mt-1 flex-1">Ouverture du dossier et constitution du permis.</p>
+        <div class="mt-4 text-2xl font-bold text-marine-800">50 000 <span class="text-sm font-normal text-slate-400">FCFA</span></div>
+      </div>
+      <!-- Code -->
+      <div class="rounded-2xl border border-slate-200 p-6 flex flex-col">
+        <div class="text-3xl">📚</div>
+        <h3 class="font-bold text-lg mt-3 text-marine-800">Forfait Code</h3>
+        <p class="text-sm text-slate-500 mt-1 flex-1">Cours de code, entraînement et présentation à l'examen théorique.</p>
+        <div class="mt-4 text-2xl font-bold text-marine-800">75 000 <span class="text-sm font-normal text-slate-400">FCFA</span></div>
+      </div>
+      <!-- Conduite -->
+      <div class="rounded-2xl border border-slate-200 p-6 flex flex-col">
+        <div class="text-3xl">🛣️</div>
+        <h3 class="font-bold text-lg mt-3 text-marine-800">Forfait Conduite</h3>
+        <p class="text-sm text-slate-500 mt-1 flex-1">Leçons de conduite avec moniteur agréé (circulation, route).</p>
+        <div class="mt-4 text-2xl font-bold text-marine-800">150 000 <span class="text-sm font-normal text-slate-400">FCFA</span></div>
+      </div>
+      <!-- Permis complet (mis en avant) -->
+      <div class="rounded-2xl border-2 border-or p-6 flex flex-col relative shadow-lg">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-or text-marine-900 text-xs font-bold px-3 py-1 rounded-full">LE PLUS CHOISI</span>
+        <div class="text-3xl">🏆</div>
+        <h3 class="font-bold text-lg mt-3 text-marine-800">Permis complet B</h3>
+        <p class="text-sm text-slate-500 mt-1 flex-1">Inscription + code + conduite + présentation à l'examen. Tout compris.</p>
+        <div class="mt-4 text-2xl font-bold text-or-600">250 000 <span class="text-sm font-normal text-slate-400">FCFA</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATOUTS -->
+  <section id="atouts" class="bg-creme py-20">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-3"><span class="text-or font-semibold text-sm">POURQUOI NOUS CHOISIR</span></div>
+      <h2 class="text-3xl font-bold text-center text-marine-800">Une auto-école sérieuse et à votre écoute</h2>
+      <div class="grid md:grid-cols-3 gap-6 mt-10">
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">👨‍🏫</div><h3 class="font-bold mt-3 text-marine-800">Moniteurs agréés</h3><p class="text-sm text-slate-500 mt-2">Des instructeurs licenciés et expérimentés, pédagogues et patients.</p></div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">🚙</div><h3 class="font-bold mt-3 text-marine-800">Véhicules entretenus</h3><p class="text-sm text-slate-500 mt-2">Un parc suivi et contrôlé pour apprendre en sécurité.</p></div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">📈</div><h3 class="font-bold mt-3 text-marine-800">Suivi personnalisé</h3><p class="text-sm text-slate-500 mt-2">Votre progression est suivie leçon après leçon jusqu'à l'examen.</p></div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">💳</div><h3 class="font-bold mt-3 text-marine-800">Paiement facile</h3><p class="text-sm text-slate-500 mt-2">Réglez au bureau ou par Mobile Money (Airtel, Moov), avec reçu.</p></div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">🧾</div><h3 class="font-bold mt-3 text-marine-800">Transparence totale</h3><p class="text-sm text-slate-500 mt-2">Chaque paiement est enregistré et vous recevez un reçu numéroté.</p></div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm"><div class="text-3xl">📍</div><h3 class="font-bold mt-3 text-marine-800">À Lambaréné</h3><p class="text-sm text-slate-500 mt-2">Une équipe locale, proche de vous et de vos besoins.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ETAPES -->
+  <section id="etapes" class="max-w-6xl mx-auto px-4 py-20">
+    <div class="text-center mb-3"><span class="text-or font-semibold text-sm">COMMENT ÇA MARCHE</span></div>
+    <h2 class="text-3xl font-bold text-center text-marine-800">4 étapes vers votre permis</h2>
+    <div class="grid md:grid-cols-4 gap-5 mt-10">
+      <div class="text-center"><div class="w-12 h-12 mx-auto rounded-full bg-marine-900 text-white font-bold flex items-center justify-center">1</div><h3 class="font-semibold mt-3 text-marine-800">Pré-inscription</h3><p class="text-sm text-slate-500 mt-1">Remplissez le formulaire ci-dessous.</p></div>
+      <div class="text-center"><div class="w-12 h-12 mx-auto rounded-full bg-marine-900 text-white font-bold flex items-center justify-center">2</div><h3 class="font-semibold mt-3 text-marine-800">Dossier & code</h3><p class="text-sm text-slate-500 mt-1">On ouvre votre dossier et vous démarrez le code.</p></div>
+      <div class="text-center"><div class="w-12 h-12 mx-auto rounded-full bg-marine-900 text-white font-bold flex items-center justify-center">3</div><h3 class="font-semibold mt-3 text-marine-800">Conduite</h3><p class="text-sm text-slate-500 mt-1">Leçons avec un moniteur agréé.</p></div>
+      <div class="text-center"><div class="w-12 h-12 mx-auto rounded-full bg-or text-marine-900 font-bold flex items-center justify-center">4</div><h3 class="font-semibold mt-3 text-marine-800">Examen</h3><p class="text-sm text-slate-500 mt-1">Présentation à l'examen du permis B.</p></div>
+    </div>
+  </section>
+
+  <!-- INSCRIPTION -->
+  <section id="inscription" class="bg-marine-900 text-white py-20">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="text-center mb-3"><span class="text-or font-semibold text-sm">PRÉ-INSCRIPTION EN LIGNE</span></div>
+      <h2 class="text-3xl font-bold text-center">Réservez votre place en 1 minute</h2>
+      <p class="text-center text-slate-300 mt-2">Laissez vos coordonnées : nous vous rappelons pour finaliser votre inscription.</p>
+
+      <form id="form-prospect" class="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6 grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-slate-200 mb-1">Prénom *</label>
+          <input name="prenom" required class="w-full rounded-lg px-3 py-2.5 text-slate-800" placeholder="Votre prénom" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-200 mb-1">Nom</label>
+          <input name="nom" class="w-full rounded-lg px-3 py-2.5 text-slate-800" placeholder="Votre nom" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-200 mb-1">Téléphone (WhatsApp) *</label>
+          <input name="telephone" required type="tel" class="w-full rounded-lg px-3 py-2.5 text-slate-800" placeholder="Ex : 077 00 00 00" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-200 mb-1">Forfait souhaité</label>
+          <select name="formule" class="w-full rounded-lg px-3 py-2.5 text-slate-800">
+            <option value="">Je ne sais pas encore</option>
+            <option>Permis complet B</option>
+            <option>Forfait Code</option>
+            <option>Forfait Conduite</option>
+            <option>Inscription seule</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-sm text-slate-200 mb-1">Message (facultatif)</label>
+          <textarea name="message" rows="2" class="w-full rounded-lg px-3 py-2.5 text-slate-800" placeholder="Une question, une disponibilité…"></textarea>
+        </div>
+        <div class="sm:col-span-2 flex flex-col sm:flex-row gap-3 items-center">
+          <button type="submit" class="w-full sm:w-auto bg-or hover:bg-or-600 text-marine-900 font-bold px-6 py-3 rounded-xl">Envoyer ma demande</button>
+          <a id="wa-btn" href="#" target="_blank" class="w-full sm:w-auto text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3 rounded-xl">💬 Écrire sur WhatsApp</a>
+        </div>
+        <p id="form-msg" class="sm:col-span-2 text-sm hidden"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- CONTACT / FOOTER -->
+  <footer class="bg-marine-800 text-slate-300">
+    <div class="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-2 font-bold text-white text-lg"><span class="text-2xl">🚗</span> Auto-École Béthel</div>
+        <p class="text-sm mt-3">Votre réussite au permis de conduire, à Lambaréné.</p>
+      </div>
+      <div>
+        <div class="font-semibold text-white mb-2">Contact</div>
+        <p class="text-sm">📞 <span class="text-slate-400">+241 00 00 00 00</span> <em class="text-xs">(à remplacer)</em></p>
+        <p class="text-sm mt-1">📍 Lambaréné, Gabon</p>
+        <p class="text-sm mt-1">💬 WhatsApp : <span class="text-slate-400">à configurer</span></p>
+      </div>
+      <div>
+        <div class="font-semibold text-white mb-2">Liens</div>
+        <a href="#forfaits" class="block text-sm hover:text-or">Nos forfaits</a>
+        <a href="#inscription" class="block text-sm hover:text-or">Pré-inscription</a>
+        <a href="/app" class="block text-sm hover:text-or">Espace gestion (personnel)</a>
+      </div>
+    </div>
+    <div class="border-t border-white/10 py-4 text-center text-xs text-slate-400">© <span id="year"></span> Auto-École Béthel · Lambaréné, Gabon</div>
+  </footer>
+
+  <!-- Bouton WhatsApp flottant -->
+  <a id="wa-float" href="#" target="_blank" class="fixed bottom-5 right-5 z-50 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl text-2xl" title="WhatsApp">💬</a>
+
+  <script>
+    // NB : numéro WhatsApp à remplacer par le vrai numéro de l'école (format international sans +).
+    const WHATSAPP_NUMERO = '24100000000';
+    const waLink = (msg) => `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(msg)}`;
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('wa-float').href = waLink("Bonjour, je souhaite des informations sur l'Auto-École Béthel.");
+    document.getElementById('wa-btn').href = waLink("Bonjour, je souhaite m'inscrire à l'Auto-École Béthel.");
+
+    document.getElementById('form-prospect').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('form-msg');
+      const data = Object.fromEntries(new FormData(e.target));
+      try {
+        const res = await fetch('/api/prospects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Erreur');
+        msg.textContent = '✅ Merci ' + (data.prenom || '') + ' ! Votre demande est bien reçue. Nous vous rappelons très vite.';
+        msg.className = 'sm:col-span-2 text-sm text-emerald-300';
+        e.target.reset();
+      } catch (err) {
+        msg.textContent = '⚠ ' + err.message + '. Vous pouvez aussi nous écrire sur WhatsApp.';
+        msg.className = 'sm:col-span-2 text-sm text-red-300';
+      }
+      msg.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
