@@ -114,6 +114,7 @@ const SECTIONS = [
   { id: 'vehicules', label: 'Véhicules', icon: '🚙', roles: ['admin'] },
   { id: 'lecons', label: 'Leçons', icon: '📅', roles: ['admin', 'moniteur'] },
   { id: 'paiements', label: 'Paiements', icon: '💳', roles: ['admin'] },
+  { id: 'impayes', label: 'Impayés', icon: '💰', roles: ['admin'] },
   { id: 'caisse', label: 'Caisse', icon: '🧾', roles: ['admin'] },
   { id: 'examens', label: 'Examens', icon: '🏁', roles: ['admin', 'moniteur'] },
   { id: 'journal', label: 'Journal', icon: '🕵️', roles: ['admin'] },
@@ -198,6 +199,8 @@ RENDER.dashboard = async () => {
         <ul class="text-sm">${alerts}</ul>
         <div class="mt-4 text-sm text-slate-500">Paiements en attente :
           <span class="font-semibold text-orange-500">${fcfa(d.paiementsEnAttente.t)}</span> (${d.paiementsEnAttente.c})</div>
+        <div class="mt-1 text-sm text-slate-500">À recouvrer (soldes élèves) :
+          <a href="#impayes" class="font-semibold text-red-600 hover:underline">${fcfa(d.aRecouvrer || 0)}</a> (${d.nbImpayes || 0})</div>
       </div>
     </div>
     <div class="grid lg:grid-cols-2 gap-4">
@@ -241,6 +244,7 @@ window.formEleve = async (id) => {
     { name: 'telephone', label: 'Téléphone (WhatsApp)', type: 'tel' },
     { name: 'adresse', label: 'Adresse' },
     { name: 'id_identite', label: 'N° d’identité (CNI)' },
+    { name: 'montant_total_du', label: 'Forfait convenu / montant total dû (FCFA)', type: 'number' },
     { name: 'statut', label: 'Statut', type: 'select', options: [
       { v: 'en_cours', l: 'En cours' }, { v: 'examen_reussi', l: 'Examen réussi' },
       { v: 'examen_echoue', l: 'Examen échoué' }, { v: 'suspendu', l: 'Suspendu' }] },
@@ -268,8 +272,15 @@ window.voirEleve = async (id) => {
     <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
       <div class="flex flex-wrap gap-2 items-center">
         ${badge(e.statut)}
-        <span class="text-sm text-slate-500">Total payé : <b>${fcfa(e.totalPaye)}</b></span>
         <a href="${e.whatsapp}" target="_blank" class="ml-auto text-sm bg-emerald-500 text-white px-3 py-1.5 rounded-lg">💬 WhatsApp</a>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-slate-50 rounded-lg p-2"><div class="text-xs text-slate-500">Forfait dû</div><div class="font-bold">${fcfa(e.montant_total_du)}</div></div>
+        <div class="bg-slate-50 rounded-lg p-2"><div class="text-xs text-slate-500">Payé</div><div class="font-bold text-emerald-600">${fcfa(e.totalPaye)}</div></div>
+        <div class="rounded-lg p-2 ${e.soldeRestant > 0 ? 'bg-red-50' : 'bg-emerald-50'}">
+          <div class="text-xs text-slate-500">Reste</div>
+          <div class="font-bold ${e.soldeRestant > 0 ? 'text-red-600' : 'text-emerald-600'}">${e.soldeRestant > 0 ? fcfa(e.soldeRestant) : (e.montant_total_du ? 'Soldé ✓' : '—')}</div>
+        </div>
       </div>
       <div><div class="font-semibold text-sm mb-1">Leçons (${e.lecons.length})</div>
         <table class="w-full text-sm border rounded">${lecons || '<tr><td class="px-3 py-2 text-slate-400">Aucune</td></tr>'}</table></div>
@@ -529,6 +540,28 @@ window.formExamen = async (id) => {
 window.notifierExamen = async (id) => {
   const r = await api('/examens/' + id + '/notifier');
   window.open(r.link, '_blank');
+};
+
+/* ---------- Impayés (contrat pédagogique : dû − payé) ---------- */
+RENDER.impayes = async () => {
+  const d = await api('/eleves/impayes');
+  const rows = d.impayes.map((e) => `<tr class="hover:bg-slate-50">
+    <td class="px-4 py-2 font-medium">${esc(e.nom)} ${esc(e.prenom)}</td>
+    <td class="px-4 py-2">${esc(e.telephone || '—')}</td>
+    <td class="px-4 py-2 text-right">${fcfa(e.montant_total_du)}</td>
+    <td class="px-4 py-2 text-right text-emerald-600">${fcfa(e.total_paye)}</td>
+    <td class="px-4 py-2 text-right font-bold text-red-600">${fcfa(e.reste)}</td>
+    <td class="px-4 py-2 text-right whitespace-nowrap">
+      <button onclick="voirEleve(${e.id})" class="text-brand hover:underline">Dossier</button>
+      · <a href="${e.whatsapp}" target="_blank" class="text-emerald-600 hover:underline">💬 Relancer</a>
+    </td></tr>`).join('');
+  $('#view').innerHTML = `
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-6 max-w-xl">
+      ${card('Total à recouvrer', fcfa(d.totalRecouvrer), null, 'red')}
+      ${card('Élèves avec solde', d.nb, null, 'orange')}
+    </div>
+    <p class="text-sm text-slate-500 mb-3">Solde = forfait convenu − paiements réellement encaissés. Un élève qui affirme avoir tout payé mais qui apparaît ici signale un encaissement non enregistré.</p>
+    ${tableWrap(['Élève', 'Téléphone', 'Forfait dû', 'Payé', 'Reste', ''], rows)}`;
 };
 
 /* ---------- Caisse (rapprochement espèces) ---------- */

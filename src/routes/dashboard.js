@@ -60,10 +60,19 @@ router.get('/', (req, res) => {
   const paiementsEnAttente = q.get(
     "SELECT COUNT(*) AS c, COALESCE(SUM(montant),0) AS t FROM paiements WHERE statut='en_attente'");
 
+  // Argent à recouvrer : somme des soldes (dû − payé) positifs sur tous les élèves.
+  const soldes = q.all(
+    `SELECT e.montant_total_du AS du,
+            COALESCE((SELECT SUM(montant) FROM paiements
+                      WHERE eleve_id = e.id AND statut='paye'), 0) AS paye
+     FROM eleves e WHERE e.montant_total_du > 0`);
+  const aRecouvrer = soldes.reduce((s, r) => s + Math.max(0, r.du - r.paye), 0);
+  const nbImpayes = soldes.filter((r) => r.du - r.paye > 0).length;
+
   res.json({
     caMois, elevesActifs, elevesTotal, leconsPrevues, leconsJour,
     revenus, tauxReussite, examens: ex, reussiteParMoniteur,
-    alertesVehicules, paiementsEnAttente,
+    alertesVehicules, paiementsEnAttente, aRecouvrer, nbImpayes,
   });
 });
 

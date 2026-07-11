@@ -159,6 +159,10 @@ addColumn('paiements', 'created_by_nom',   "TEXT NOT NULL DEFAULT ''");
 addColumn('paiements', 'numero_recu',      'INTEGER');        // séquence continue, attribuée à l'encaissement
 addColumn('paiements', 'annulation_motif', "TEXT NOT NULL DEFAULT ''");
 
+// Migration 003 : contrat pédagogique — montant total convenu par élève.
+// Le solde restant (dû − payé) révèle l'argent encaissé mais jamais entré en caisse.
+addColumn('eleves', 'montant_total_du', 'INTEGER NOT NULL DEFAULT 0');
+
 // Helpers pratiques.
 export const q = {
   all: (sql, ...p) => db.prepare(sql).all(...p),
