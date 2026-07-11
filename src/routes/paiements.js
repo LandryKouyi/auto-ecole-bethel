@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { q } from '../db.js';
-import { requireAuth } from '../middleware.js';
+import { requireAuth, requireRole } from '../middleware.js';
 import { initPayment, checkPayment, ebillingConfigure } from '../ebilling.js';
+import { logAudit, assignReceiptNumber } from '../audit.js';
 
 const router = Router();
 
@@ -19,14 +20,19 @@ router.post('/webhook', async (req, res) => {
     const { paye } = await checkPayment(paiement.reference);
     q.run("UPDATE paiements SET statut = ?, date_paiement = datetime('now') WHERE id = ?",
       paye ? 'paye' : paiement.statut, paiement.id);
+    if (paye) {
+      assignReceiptNumber(paiement.id);
+      logAudit(req, { action: 'paiement.paye_webhook', table: 'paiements', id: paiement.id,
+        details: { montant: paiement.montant, reference: paiement.reference } });
+    }
     res.json({ ok: true, paye });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-// À partir d'ici : routes protégées.
-router.use(requireAuth);
+// À partir d'ici : routes protégées, réservées à l'administration (encaissement/caisse).
+router.use(requireAuth, requireRole('admin'));
 
 // Liste (filtre par élève ou statut)
 router.get('/', (req, res) => {
@@ -45,8 +51,14 @@ router.post('/', (req, res) => {
   const { eleve_id, montant, type = 'lecon', libelle = '', moyen = 'especes', statut = 'paye' } = req.body || {};
   if (!eleve_id || !montant) return res.status(400).json({ error: 'Élève et montant requis' });
   const r = q.run(
-    'INSERT INTO paiements (eleve_id, montant, type, libelle, moyen, statut) VALUES (?,?,?,?,?,?)',
-    eleve_id, Math.round(montant), type, libelle, moyen, statut);
+    `INSERT INTO paiements (eleve_id, montant, type, libelle, moyen, statut, created_by, created_by_nom)
+     VALUES (?,?,?,?,?,?,?,?)`,
+    eleve_id, Math.round(montant), type, libelle, moyen, statut,
+    req.user.uid, req.user.nom || '');
+  // Un paiement encaissé reçoit immédiatement son numéro de reçu séquentiel.
+  if (statut === 'paye') assignReceiptNumber(r.lastInsertRowid);
+  logAudit(req, { action: 'paiement.create', table: 'paiements', id: r.lastInsertRowid,
+    details: { eleve_id, montant: Math.round(montant), type, moyen, statut } });
   res.status(201).json(q.get('SELECT * FROM paiements WHERE id = ?', r.lastInsertRowid));
 });
 
@@ -62,8 +74,10 @@ router.post('/ebilling/init', async (req, res) => {
   const transaction_id = `AE-${Date.now()}-${eleve_id}`;
   // On crée le paiement "en_attente" AVANT d'appeler E-Billing.
   const r = q.run(
-    'INSERT INTO paiements (eleve_id, montant, type, libelle, moyen, statut, reference) VALUES (?,?,?,?,?,?,?)',
-    eleve_id, Math.round(montant), type, libelle, 'ebilling', 'en_attente', transaction_id);
+    `INSERT INTO paiements (eleve_id, montant, type, libelle, moyen, statut, reference, created_by, created_by_nom)
+     VALUES (?,?,?,?,?,?,?,?,?)`,
+    eleve_id, Math.round(montant), type, libelle, 'ebilling', 'en_attente', transaction_id,
+    req.user.uid, req.user.nom || '');
   try {
     const info = await initPayment({
       transaction_id, montant: Math.round(montant),
@@ -72,6 +86,8 @@ router.post('/ebilling/init', async (req, res) => {
     });
     // On garde le bill_id comme référence de vérité.
     q.run('UPDATE paiements SET reference = ? WHERE id = ?', info.bill_id, r.lastInsertRowid);
+    logAudit(req, { action: 'paiement.ebilling_init', table: 'paiements', id: r.lastInsertRowid,
+      details: { eleve_id, montant: Math.round(montant), bill_id: info.bill_id } });
     res.json({
       paiement_id: r.lastInsertRowid, bill_id: info.bill_id,
       ussd_pousse: info.ussd_pousse, operateur: info.operateur,
@@ -91,10 +107,28 @@ router.post('/:id/verifier', async (req, res) => {
   try {
     const { paye, statut } = await checkPayment(p.reference);
     q.run('UPDATE paiements SET statut = ? WHERE id = ?', paye ? 'paye' : p.statut, p.id);
+    if (paye) {
+      assignReceiptNumber(p.id);
+      logAudit(req, { action: 'paiement.paye_verif', table: 'paiements', id: p.id,
+        details: { montant: p.montant, reference: p.reference } });
+    }
     res.json({ paye, statut });
   } catch (e) {
     res.status(502).json({ error: e.message });
   }
+});
+
+// Annuler un paiement — JAMAIS de suppression : on trace un motif et on conserve la ligne.
+router.post('/:id/annuler', (req, res) => {
+  const p = q.get('SELECT * FROM paiements WHERE id = ?', req.params.id);
+  if (!p) return res.status(404).json({ error: 'Paiement introuvable' });
+  if (p.statut === 'annule') return res.status(400).json({ error: 'Paiement déjà annulé' });
+  const motif = String(req.body?.motif || '').trim();
+  if (!motif) return res.status(400).json({ error: 'Motif d’annulation obligatoire' });
+  q.run("UPDATE paiements SET statut = 'annule', annulation_motif = ? WHERE id = ?", motif, p.id);
+  logAudit(req, { action: 'paiement.annule', table: 'paiements', id: p.id,
+    details: { statut_avant: p.statut, montant: p.montant, numero_recu: p.numero_recu, motif } });
+  res.json({ ok: true });
 });
 
 // Générer un reçu (données JSON pour impression/PDF côté client)

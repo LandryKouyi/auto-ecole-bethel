@@ -13,6 +13,8 @@ import leconsRoutes from './src/routes/lecons.js';
 import paiementsRoutes from './src/routes/paiements.js';
 import examensRoutes from './src/routes/examens.js';
 import dashboardRoutes from './src/routes/dashboard.js';
+import caisseRoutes from './src/routes/caisse.js';
+import auditRoutes from './src/routes/audit.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -40,6 +42,8 @@ app.use('/api/lecons', leconsRoutes);
 app.use('/api/paiements', paiementsRoutes);
 app.use('/api/examens', examensRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/caisse', caisseRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Frontend statique
 app.use(express.static(join(__dirname, 'public')));

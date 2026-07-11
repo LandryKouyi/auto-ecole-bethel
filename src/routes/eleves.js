@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { q } from '../db.js';
 import { requireAuth, requireRole } from '../middleware.js';
 import { whatsappLink, modeles } from '../whatsapp.js';
+import { logAudit } from '../audit.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -64,9 +65,14 @@ router.put('/:id', (req, res) => {
   res.json(q.get('SELECT * FROM eleves WHERE id = ?', req.params.id));
 });
 
-// Supprimer (admin uniquement)
+// Supprimer (admin uniquement) — cascade sur leçons/paiements/examens, donc tracé.
 router.delete('/:id', requireRole('admin'), (req, res) => {
+  const cur = q.get('SELECT * FROM eleves WHERE id = ?', req.params.id);
+  if (!cur) return res.status(404).json({ error: 'Élève introuvable' });
+  const nbPaie = q.get('SELECT COUNT(*) AS c FROM paiements WHERE eleve_id = ?', req.params.id).c;
   q.run('DELETE FROM eleves WHERE id = ?', req.params.id);
+  logAudit(req, { action: 'eleve.delete', table: 'eleves', id: Number(req.params.id),
+    details: { nom: cur.nom, prenom: cur.prenom, paiements_supprimes: nbPaie } });
   res.json({ ok: true });
 });
 

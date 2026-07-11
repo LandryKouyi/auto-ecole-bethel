@@ -114,7 +114,9 @@ const SECTIONS = [
   { id: 'vehicules', label: 'Véhicules', icon: '🚙', roles: ['admin'] },
   { id: 'lecons', label: 'Leçons', icon: '📅', roles: ['admin', 'moniteur'] },
   { id: 'paiements', label: 'Paiements', icon: '💳', roles: ['admin'] },
+  { id: 'caisse', label: 'Caisse', icon: '🧾', roles: ['admin'] },
   { id: 'examens', label: 'Examens', icon: '🏁', roles: ['admin', 'moniteur'] },
+  { id: 'journal', label: 'Journal', icon: '🕵️', roles: ['admin'] },
 ];
 
 function buildNav() {
@@ -392,18 +394,31 @@ RENDER.paiements = async () => {
   $('#header-actions').innerHTML =
     `<div class="flex gap-2">${btnPrimary('💳 Paiement Mobile Money', 'formEbilling()')}${btnPrimary('+ Paiement manuel', 'formPaiement()')}</div>`;
   const list = await api('/paiements');
-  const rows = list.map((p) => `<tr class="hover:bg-slate-50">
+  const rows = list.map((p) => `<tr class="hover:bg-slate-50 ${p.statut === 'annule' ? 'opacity-60' : ''}">
+    <td class="px-4 py-2 font-mono text-xs">${p.numero_recu ? '№' + String(p.numero_recu).padStart(6, '0') : '—'}</td>
     <td class="px-4 py-2 whitespace-nowrap">${fmtDate(p.date_paiement)}</td>
     <td class="px-4 py-2">${esc(p.eleve_prenom || '')} ${esc(p.eleve_nom || '')}</td>
     <td class="px-4 py-2">${LABEL[p.type]}${p.libelle ? ` — ${esc(p.libelle)}` : ''}</td>
     <td class="px-4 py-2 font-semibold">${fcfa(p.montant)}</td>
     <td class="px-4 py-2">${LABEL[p.moyen] || p.moyen}</td>
+    <td class="px-4 py-2 text-xs text-slate-500">${esc(p.created_by_nom || '—')}</td>
     <td class="px-4 py-2">${badge(p.statut)}</td>
     <td class="px-4 py-2 text-right whitespace-nowrap">
       <button onclick="recu(${p.id})" class="text-brand hover:underline">Reçu</button>
       ${p.reference && p.statut === 'en_attente' ? `· <button onclick="verifierPaie(${p.id})" class="text-orange-500 hover:underline">Vérifier</button>` : ''}
+      ${p.statut !== 'annule' ? `· <button onclick="annulerPaie(${p.id})" class="text-red-500 hover:underline">Annuler</button>` : ''}
     </td></tr>`).join('');
-  $('#view').innerHTML = tableWrap(['Date', 'Élève', 'Objet', 'Montant', 'Moyen', 'Statut', ''], rows);
+  $('#view').innerHTML = tableWrap(['N° reçu', 'Date', 'Élève', 'Objet', 'Montant', 'Moyen', 'Encaissé par', 'Statut', ''], rows);
+};
+
+window.annulerPaie = async (id) => {
+  const motif = prompt('Motif de l’annulation (obligatoire, conservé au journal) :');
+  if (motif === null) return;
+  if (!motif.trim()) return toast('Motif obligatoire', false);
+  try {
+    await api('/paiements/' + id + '/annuler', { method: 'POST', body: { motif: motif.trim() } });
+    toast('Paiement annulé (tracé)'); go('paiements');
+  } catch (e) { toast(e.message, false); }
 };
 
 window.formPaiement = async () => {
@@ -455,7 +470,7 @@ window.recu = async (id) => {
         <div class="text-2xl">🚗</div>
         <div class="font-bold text-marine-800">AUTO-ÉCOLE BÉTHEL</div>
         <div class="text-xs text-slate-500">Lambaréné</div>
-        <div class="text-xs text-slate-500">Reçu de paiement N°${p.id}</div>
+        <div class="text-xs text-slate-500">Reçu N°${p.numero_recu ? String(p.numero_recu).padStart(6, '0') : '—'} (réf. interne ${p.id})</div>
       </div>
       <table class="w-full text-sm">
         <tr><td class="py-1 text-slate-500">Élève</td><td class="py-1 text-right font-medium">${esc(p.eleve_prenom)} ${esc(p.eleve_nom)}</td></tr>
@@ -463,8 +478,10 @@ window.recu = async (id) => {
         <tr><td class="py-1 text-slate-500">Objet</td><td class="py-1 text-right">${LABEL[p.type]}${p.libelle ? ' — ' + esc(p.libelle) : ''}</td></tr>
         <tr><td class="py-1 text-slate-500">Moyen</td><td class="py-1 text-right">${LABEL[p.moyen] || p.moyen}</td></tr>
         <tr><td class="py-1 text-slate-500">Date</td><td class="py-1 text-right">${fmtDate(p.date_paiement)}</td></tr>
+        <tr><td class="py-1 text-slate-500">Encaissé par</td><td class="py-1 text-right">${esc(p.created_by_nom || '—')}</td></tr>
         <tr><td class="py-2 font-bold border-t">MONTANT</td><td class="py-2 text-right font-bold border-t text-lg">${fcfa(p.montant)}</td></tr>
       </table>
+      ${p.statut === 'annule' ? `<div class="mt-2 text-xs text-red-600">⚠ Annulé — motif : ${esc(p.annulation_motif || '')}</div>` : ''}
       <div class="mt-3">${badge(p.statut)}</div>
     </div>
     <div class="px-6 pb-6 flex gap-2 justify-end">
@@ -512,6 +529,89 @@ window.formExamen = async (id) => {
 window.notifierExamen = async (id) => {
   const r = await api('/examens/' + id + '/notifier');
   window.open(r.link, '_blank');
+};
+
+/* ---------- Caisse (rapprochement espèces) ---------- */
+RENDER.caisse = async (date) => {
+  date = date || todayISO();
+  const [etat, hist] = await Promise.all([
+    api('/caisse/jour?date=' + date),
+    api('/caisse/historique'),
+  ]);
+  const lignes = etat.lignes.map((l) => `<tr>
+    <td class="px-3 py-1.5 font-mono text-xs">${l.numero_recu ? '№' + String(l.numero_recu).padStart(6, '0') : '—'}</td>
+    <td class="px-3 py-1.5">${fmtDate(l.date_paiement).slice(11)}</td>
+    <td class="px-3 py-1.5">${esc(l.eleve_prenom || '')} ${esc(l.eleve_nom || '')}</td>
+    <td class="px-3 py-1.5">${LABEL[l.type] || l.type}</td>
+    <td class="px-3 py-1.5 text-right font-semibold">${fcfa(l.montant)}</td>
+    <td class="px-3 py-1.5 text-xs text-slate-500">${esc(l.created_by_nom || '—')}</td></tr>`).join('');
+  const c = etat.cloture;
+  const ecartColor = c ? (c.ecart === 0 ? 'text-emerald-600' : 'text-red-600') : '';
+  const histRows = hist.map((h) => `<tr class="hover:bg-slate-50">
+    <td class="px-4 py-2">${h.date_caisse}</td>
+    <td class="px-4 py-2 text-right">${fcfa(h.total_theorique)}</td>
+    <td class="px-4 py-2 text-right">${fcfa(h.montant_compte)}</td>
+    <td class="px-4 py-2 text-right font-semibold ${h.ecart === 0 ? 'text-emerald-600' : 'text-red-600'}">${h.ecart > 0 ? '+' : ''}${fcfa(h.ecart)}</td>
+    <td class="px-4 py-2 text-xs text-slate-500">${esc(h.user_nom || '')}</td>
+    <td class="px-4 py-2 text-xs text-slate-500">${esc(h.commentaire || '')}</td></tr>`).join('');
+
+  $('#view').innerHTML = `
+    <div class="flex items-center gap-2 mb-4">
+      <label class="text-sm text-slate-500">Jour :</label>
+      <input type="date" id="caisse-date" value="${date}" class="border rounded-lg px-3 py-1.5 text-sm" />
+    </div>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      ${card('Espèces encaissées (théorique)', fcfa(etat.total_theorique), `${etat.nb_paiements} paiement(s)`, 'emerald')}
+      ${card('Caisse comptée', c ? fcfa(c.montant_compte) : '—', c ? `clôturé par ${esc(c.user_nom)}` : 'non clôturé', 'brand')}
+      ${card('Écart', c ? (c.ecart > 0 ? '+' : '') + fcfa(c.ecart) : '—', c && c.ecart !== 0 ? '⚠ à justifier' : (c ? 'caisse juste ✓' : ''), c && c.ecart !== 0 ? 'red' : 'emerald')}
+    </div>
+    <div class="mb-6">${btnPrimary(c ? '🔁 Nouvelle clôture (re-comptage)' : '🧾 Clôturer la caisse du jour', `clotureCaisse('${date}', ${etat.total_theorique})`)}</div>
+    <div class="grid lg:grid-cols-2 gap-6">
+      <div>
+        <div class="font-semibold mb-2 text-marine-800">Encaissements espèces du ${date}</div>
+        ${tableWrap(['N°', 'Heure', 'Élève', 'Objet', 'Montant', 'Par'], lignes)}
+      </div>
+      <div>
+        <div class="font-semibold mb-2 text-marine-800">Historique des clôtures</div>
+        ${tableWrap(['Date', 'Théorique', 'Compté', 'Écart', 'Par', 'Note'], histRows)}
+      </div>
+    </div>`;
+  $('#caisse-date').addEventListener('change', (e) => RENDER.caisse(e.target.value));
+};
+
+window.clotureCaisse = (date, theorique) => {
+  formModal('Clôture de caisse — ' + date, [
+    { name: 'montant_compte', label: `Espèces réellement comptées (théorique : ${fcfa(theorique)})`, type: 'number', required: true },
+    { name: 'commentaire', label: 'Commentaire (obligatoire si écart)', type: 'textarea' },
+  ], {}, async (fd) => {
+    const r = await api('/caisse/cloture', { method: 'POST', body: { ...fd, date } });
+    toast(r.ecart === 0 ? 'Caisse juste ✓' : 'Clôture enregistrée — écart : ' + fcfa(r.ecart), r.ecart === 0);
+    RENDER.caisse(date);
+  });
+};
+
+/* ---------- Journal d'audit ---------- */
+const AUDIT_LABEL = {
+  'paiement.create': '💳 Paiement enregistré', 'paiement.annule': '🚫 Paiement annulé',
+  'paiement.paye_webhook': '✅ Paiement confirmé (auto)', 'paiement.paye_verif': '✅ Paiement confirmé (vérif.)',
+  'paiement.ebilling_init': '📲 Paiement Mobile Money initié', 'caisse.cloture': '🧾 Clôture de caisse',
+  'eleve.delete': '🗑️ Élève supprimé',
+};
+RENDER.journal = async () => {
+  const list = await api('/audit');
+  const rows = list.map((a) => {
+    let d = a.details;
+    try { d = JSON.stringify(JSON.parse(a.details)); } catch { /* garde brut */ }
+    return `<tr class="hover:bg-slate-50">
+      <td class="px-4 py-2 whitespace-nowrap text-xs">${fmtDate(a.created_at)}</td>
+      <td class="px-4 py-2">${AUDIT_LABEL[a.action] || esc(a.action)}</td>
+      <td class="px-4 py-2">${esc(a.user_nom || '—')} <span class="text-xs text-slate-400">${esc(a.role)}</span></td>
+      <td class="px-4 py-2 text-xs text-slate-500">${esc(a.cible_table)}${a.cible_id ? ' #' + a.cible_id : ''}</td>
+      <td class="px-4 py-2 text-xs text-slate-500 max-w-xs truncate" title="${esc(d)}">${esc(d)}</td></tr>`;
+  }).join('');
+  $('#view').innerHTML = `
+    <p class="text-sm text-slate-500 mb-3">Trace immuable des actions sensibles (paiements, annulations, clôtures, suppressions).</p>
+    ${tableWrap(['Date/heure', 'Action', 'Auteur', 'Cible', 'Détails'], rows)}`;
 };
 
 window.closeModal = closeModal;

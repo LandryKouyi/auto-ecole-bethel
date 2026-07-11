@@ -109,7 +109,55 @@ CREATE INDEX IF NOT EXISTS idx_lecons_moniteur ON lecons(moniteur_id);
 CREATE INDEX IF NOT EXISTS idx_lecons_date    ON lecons(date_heure);
 CREATE INDEX IF NOT EXISTS idx_paiements_eleve ON paiements(eleve_id);
 CREATE INDEX IF NOT EXISTS idx_examens_eleve  ON examens(eleve_id);
+
+-- Migration 002 : traçabilité & anti-détournement --------------------------
+
+-- Journal d'audit : trace immuable de chaque action sensible (qui / quoi / quand).
+CREATE TABLE IF NOT EXISTS audit_log (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id      INTEGER,                              -- auteur (users.id), NULL si système
+  user_nom     TEXT NOT NULL DEFAULT '',
+  role         TEXT NOT NULL DEFAULT '',
+  action       TEXT NOT NULL,                        -- ex 'paiement.create', 'paiement.annule', 'caisse.cloture'
+  cible_table  TEXT NOT NULL DEFAULT '',
+  cible_id     INTEGER,
+  details      TEXT NOT NULL DEFAULT '',             -- JSON (avant/après ou description libre)
+  ip           TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_audit_date   ON audit_log(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action);
+CREATE INDEX IF NOT EXISTS idx_audit_cible  ON audit_log(cible_table, cible_id);
+
+-- Clôture de caisse : rapprochement quotidien cash théorique ↔ cash physique déclaré.
+CREATE TABLE IF NOT EXISTS cloture_caisse (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  date_caisse      TEXT NOT NULL,                    -- 'YYYY-MM-DD'
+  user_id          INTEGER,
+  user_nom         TEXT NOT NULL DEFAULT '',
+  total_theorique  INTEGER NOT NULL DEFAULT 0,       -- somme des espèces encaissées ce jour (FCFA)
+  montant_compte   INTEGER NOT NULL DEFAULT 0,       -- cash physique compté en caisse (FCFA)
+  ecart            INTEGER NOT NULL DEFAULT 0,       -- montant_compte - total_theorique
+  nb_paiements     INTEGER NOT NULL DEFAULT 0,
+  commentaire      TEXT NOT NULL DEFAULT '',
+  created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_cloture_date ON cloture_caisse(date_caisse);
 `);
+
+// --- Migrations additives idempotentes (colonnes ajoutées après coup) -------
+function columnExists(table, col) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col);
+}
+function addColumn(table, col, def) {
+  if (!columnExists(table, col)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+}
+
+// Responsabilité nominative + reçu numéroté + annulation tracée sur les paiements.
+addColumn('paiements', 'created_by',       'INTEGER');
+addColumn('paiements', 'created_by_nom',   "TEXT NOT NULL DEFAULT ''");
+addColumn('paiements', 'numero_recu',      'INTEGER');        // séquence continue, attribuée à l'encaissement
+addColumn('paiements', 'annulation_motif', "TEXT NOT NULL DEFAULT ''");
 
 // Helpers pratiques.
 export const q = {
