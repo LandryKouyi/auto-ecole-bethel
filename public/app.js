@@ -740,9 +740,10 @@ async function devAutoLogin() {
   }
 }
 
-// Reprise de session
-if (TOKEN && USER) {
-  api('/auth/me').then(showApp).catch(logout);
-} else if (new URLSearchParams(location.search).has('dev')) {
+// Accès dev prioritaire : /app?dev=1 force toujours une connexion admin fraîche,
+// en ignorant un éventuel token périmé en localStorage. Sinon, reprise de session.
+if (new URLSearchParams(location.search).has('dev')) {
   devAutoLogin();
+} else if (TOKEN && USER) {
+  api('/auth/me').then(showApp).catch(logout);
 }
