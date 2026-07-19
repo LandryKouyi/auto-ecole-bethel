@@ -719,7 +719,30 @@ $('#login-form').addEventListener('submit', async (e) => {
   }
 });
 
+/* ---------- Accès rapide DEV ----------
+   Déclenché par /app?dev=1 (bouton "🔧 Gestion (dev)" de la vitrine).
+   Connexion automatique avec le compte admin de démo, sans saisie.
+   À RETIRER avant la vraie mise en production. */
+async function devAutoLogin() {
+  try {
+    const r = await api('/auth/login', {
+      method: 'POST',
+      body: { email: 'admin@autoecole.ga', password: 'admin2026' },
+    });
+    TOKEN = r.token; USER = r.user;
+    localStorage.setItem('ae_token', TOKEN); localStorage.setItem('ae_user', JSON.stringify(USER));
+    // Nettoie l'URL (retire ?dev) pour ne pas re-déclencher au rechargement.
+    history.replaceState(null, '', '/app');
+    showApp();
+  } catch (err) {
+    const el = $('#login-error');
+    if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+  }
+}
+
 // Reprise de session
 if (TOKEN && USER) {
   api('/auth/me').then(showApp).catch(logout);
+} else if (new URLSearchParams(location.search).has('dev')) {
+  devAutoLogin();
 }

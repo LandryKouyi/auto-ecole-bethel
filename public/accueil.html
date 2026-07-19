@@ -36,9 +36,16 @@
         <a href="#forfaits" class="hover:text-or">Forfaits</a>
         <a href="#atouts" class="hover:text-or">Pourquoi nous</a>
         <a href="#etapes" class="hover:text-or">Comment ça marche</a>
+        <!-- DEV : accès direct à l'espace de gestion, sans saisie de mot de passe. À RETIRER avant la vraie mise en production. -->
+        <a href="/app?dev=1" title="Accès direct à l'espace de gestion (mode développement)"
+           class="border border-or/40 text-or hover:bg-or hover:text-marine-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition">🔧 Gestion (dev)</a>
         <a href="#inscription" class="bg-or hover:bg-or-600 text-marine-900 font-semibold px-4 py-2 rounded-lg">Pré-inscription</a>
       </nav>
-      <a href="#inscription" class="md:hidden bg-or text-marine-900 font-semibold px-3 py-1.5 rounded-lg text-sm">S'inscrire</a>
+      <div class="md:hidden flex items-center gap-2">
+        <!-- DEV : accès gestion sur mobile. À RETIRER avant production. -->
+        <a href="/app?dev=1" class="border border-or/40 text-or px-2.5 py-1.5 rounded-lg text-sm">🔧</a>
+        <a href="#inscription" class="bg-or text-marine-900 font-semibold px-3 py-1.5 rounded-lg text-sm">S'inscrire</a>
+      </div>
     </div>
   </header>
 
