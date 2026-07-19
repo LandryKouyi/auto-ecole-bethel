@@ -36,14 +36,14 @@
         <a href="#forfaits" class="hover:text-or">Forfaits</a>
         <a href="#atouts" class="hover:text-or">Pourquoi nous</a>
         <a href="#etapes" class="hover:text-or">Comment ça marche</a>
-        <!-- DEV : accès direct à l'espace de gestion, sans saisie de mot de passe. À RETIRER avant la vraie mise en production. -->
-        <a href="/app?dev=1" title="Accès direct à l'espace de gestion (mode développement)"
-           class="border border-or/40 text-or hover:bg-or hover:text-marine-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition">🔧 Gestion (dev)</a>
+        <!-- DEV : accès direct à l'espace de gestion, affiché seulement si DEV_ACCESS=1 (piloté par /api/config). -->
+        <a href="/app?dev=1" data-dev-link title="Accès direct à l'espace de gestion (mode développement)"
+           class="hidden border border-or/40 text-or hover:bg-or hover:text-marine-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition">🔧 Gestion (dev)</a>
         <a href="#inscription" class="bg-or hover:bg-or-600 text-marine-900 font-semibold px-4 py-2 rounded-lg">Pré-inscription</a>
       </nav>
       <div class="md:hidden flex items-center gap-2">
-        <!-- DEV : accès gestion sur mobile. À RETIRER avant production. -->
-        <a href="/app?dev=1" class="border border-or/40 text-or px-2.5 py-1.5 rounded-lg text-sm">🔧</a>
+        <!-- DEV : accès gestion sur mobile, affiché seulement si DEV_ACCESS=1. -->
+        <a href="/app?dev=1" data-dev-link class="hidden border border-or/40 text-or px-2.5 py-1.5 rounded-lg text-sm">🔧</a>
         <a href="#inscription" class="bg-or text-marine-900 font-semibold px-3 py-1.5 rounded-lg text-sm">S'inscrire</a>
       </div>
     </div>
@@ -235,6 +235,11 @@
       }
       msg.classList.remove('hidden');
     });
+
+    // Affiche le bouton "Gestion (dev)" seulement si le serveur l'autorise (DEV_ACCESS=1).
+    fetch('/api/config').then((r) => r.json()).then((cfg) => {
+      if (cfg.devAccess) document.querySelectorAll('[data-dev-link]').forEach((a) => a.classList.remove('hidden'));
+    }).catch(() => {});
   </script>
 </body>
 </html>

@@ -16,6 +16,7 @@ import dashboardRoutes from './src/routes/dashboard.js';
 import caisseRoutes from './src/routes/caisse.js';
 import auditRoutes from './src/routes/audit.js';
 import prospectsRoutes from './src/routes/prospects.js';
+import usersRoutes from './src/routes/users.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -34,6 +35,10 @@ app.use((req, res, next) => {
 // Santé (pour le health check Render).
 app.get('/api/sante', (req, res) => res.json({ ok: true, service: 'auto-ecole', ts: Date.now() }));
 
+// Config publique lue par le frontend. `devAccess` pilote le bouton "Gestion (dev)"
+// et l'auto-connexion : activé UNIQUEMENT si la variable d'env DEV_ACCESS=1 (jamais en prod).
+app.get('/api/config', (req, res) => res.json({ devAccess: process.env.DEV_ACCESS === '1' }));
+
 // API
 app.use('/api/auth', authRoutes);
 app.use('/api/eleves', elevesRoutes);
@@ -46,6 +51,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/caisse', caisseRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/prospects', prospectsRoutes);
+app.use('/api/users', usersRoutes);
 
 // Frontend : landing publique sur '/', application de gestion sur '/app'.
 const PUBLIC = join(__dirname, 'public');

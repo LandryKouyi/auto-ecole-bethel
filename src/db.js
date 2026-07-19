@@ -178,6 +178,10 @@ addColumn('paiements', 'annulation_motif', "TEXT NOT NULL DEFAULT ''");
 // Le solde restant (dû − payé) révèle l'argent encaissé mais jamais entré en caisse.
 addColumn('eleves', 'montant_total_du', 'INTEGER NOT NULL DEFAULT 0');
 
+// Migration 004 : gestion des comptes de connexion — désactivation sans suppression.
+// Un compte inactif est conservé (historique intact) mais ne peut plus se connecter.
+addColumn('users', 'actif', 'INTEGER NOT NULL DEFAULT 1');
+
 // Helpers pratiques.
 export const q = {
   all: (sql, ...p) => db.prepare(sql).all(...p),

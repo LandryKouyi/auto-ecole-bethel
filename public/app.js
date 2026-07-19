@@ -119,6 +119,8 @@ const SECTIONS = [
   { id: 'caisse', label: 'Caisse', icon: '🧾', roles: ['admin'] },
   { id: 'examens', label: 'Examens', icon: '🏁', roles: ['admin', 'moniteur'] },
   { id: 'journal', label: 'Journal', icon: '🕵️', roles: ['admin'] },
+  { id: 'utilisateurs', label: 'Utilisateurs', icon: '👤', roles: ['admin'] },
+  { id: 'moncompte', label: 'Mon compte', icon: '⚙️', roles: ['admin', 'moniteur'] },
 ];
 
 function buildNav() {
@@ -669,6 +671,9 @@ const AUDIT_LABEL = {
   'paiement.paye_webhook': '✅ Paiement confirmé (auto)', 'paiement.paye_verif': '✅ Paiement confirmé (vérif.)',
   'paiement.ebilling_init': '📲 Paiement Mobile Money initié', 'caisse.cloture': '🧾 Clôture de caisse',
   'eleve.delete': '🗑️ Élève supprimé',
+  'user.create': '👤 Compte créé', 'user.update': '✏️ Compte modifié',
+  'user.delete': '🗑️ Compte supprimé', 'user.password_reset': '🔑 Mot de passe réinitialisé',
+  'user.password_change': '🔑 Mot de passe changé',
 };
 RENDER.journal = async () => {
   const list = await api('/audit');
@@ -685,6 +690,146 @@ RENDER.journal = async () => {
   $('#view').innerHTML = `
     <p class="text-sm text-slate-500 mb-3">Trace immuable des actions sensibles (paiements, annulations, clôtures, suppressions).</p>
     ${tableWrap(['Date/heure', 'Action', 'Auteur', 'Cible', 'Détails'], rows)}`;
+};
+
+/* ---------- Utilisateurs (comptes de connexion) — admin ---------- */
+const roleBadge = (r) => r === 'admin'
+  ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-marine-800 text-white">Admin</span>'
+  : '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Moniteur</span>';
+const etatBadge = (a) => a
+  ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Actif</span>'
+  : '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-600">Désactivé</span>';
+
+RENDER.utilisateurs = async () => {
+  $('#header-actions').innerHTML = btnPrimary('+ Nouveau compte', 'formUser()');
+  const list = await api('/users');
+  const rows = list.map((u) => {
+    const isMe = USER.id === u.id;
+    return `<tr class="hover:bg-slate-50">
+      <td class="px-4 py-2">
+        <div class="font-medium">${esc(u.nom || '—')}${isMe ? ' <span class="text-xs text-slate-400">(vous)</span>' : ''}</div>
+        <div class="text-xs text-slate-500">${esc(u.email)}</div></td>
+      <td class="px-4 py-2">${roleBadge(u.role)}</td>
+      <td class="px-4 py-2 text-sm">${u.moniteur_nom ? esc(u.moniteur_nom) : '—'}</td>
+      <td class="px-4 py-2">${etatBadge(u.actif)}</td>
+      <td class="px-4 py-2 text-right whitespace-nowrap text-sm">
+        <button onclick="formUser(${u.id})" class="text-brand hover:underline">Modifier</button>
+        <button onclick="resetUserPassword(${u.id})" class="text-brand hover:underline ml-3">Mot de passe</button>
+        ${isMe ? '' : `<button onclick="toggleUser(${u.id}, ${u.actif ? 0 : 1})" class="hover:underline ml-3 ${u.actif ? 'text-orange-600' : 'text-emerald-600'}">${u.actif ? 'Désactiver' : 'Activer'}</button>
+        <button onclick="deleteUser(${u.id})" class="text-red-600 hover:underline ml-3">Supprimer</button>`}
+      </td></tr>`;
+  }).join('');
+  $('#view').innerHTML = `
+    <p class="text-sm text-slate-500 mb-3">Comptes autorisés à se connecter à l'espace de gestion. Un moniteur ajouté dans « Moniteurs » ne peut pas se connecter tant que vous ne lui créez pas un compte ici.</p>
+    ${tableWrap(['Compte', 'Rôle', 'Moniteur lié', 'État', ''], rows)}`;
+};
+
+const roleOptions = [{ v: 'moniteur', l: 'Moniteur' }, { v: 'admin', l: 'Administrateur' }];
+
+window.formUser = async (id) => {
+  if (id) {
+    const u = (await api('/users')).find((x) => x.id === id);
+    if (!u) return;
+    const moniteurs = await api('/moniteurs');
+    formModal('Modifier le compte — ' + esc(u.email), [
+      { name: 'nom', label: 'Nom affiché' },
+      { name: 'role', label: 'Rôle', type: 'select', options: roleOptions },
+      { name: 'moniteur_id', label: 'Moniteur lié', type: 'select',
+        options: [{ v: '', l: '— Aucun —' }, ...moniteurs.map((m) => ({ v: m.id, l: m.prenom + ' ' + m.nom }))] },
+    ], u, async (fd) => {
+      await api('/users/' + id, { method: 'PUT', body: fd });
+      toast('Compte mis à jour'); go('utilisateurs');
+    });
+  } else {
+    const libres = await api('/users/moniteurs-sans-compte');
+    formModal('Nouveau compte', [
+      { name: 'email', label: 'Email de connexion', type: 'email', required: true },
+      { name: 'nom', label: 'Nom affiché' },
+      { name: 'role', label: 'Rôle', type: 'select', options: roleOptions },
+      { name: 'moniteur_id', label: 'Lier à un moniteur (optionnel)', type: 'select',
+        options: [{ v: '', l: '— Aucun —' }, ...libres.map((m) => ({ v: m.id, l: m.prenom + ' ' + m.nom }))] },
+      { name: 'password', label: 'Mot de passe (min. 6 caractères)', type: 'password', required: true },
+    ], {}, async (fd) => {
+      await api('/users', { method: 'POST', body: fd });
+      toast('Compte créé'); go('utilisateurs');
+    });
+  }
+};
+
+window.resetUserPassword = async (id) => {
+  const u = (await api('/users')).find((x) => x.id === id);
+  if (!u) return;
+  formModal('Réinitialiser le mot de passe — ' + esc(u.email), [
+    { name: 'password', label: 'Nouveau mot de passe (min. 6 caractères)', type: 'password', required: true },
+  ], {}, async (fd) => {
+    await api('/users/' + id + '/password', { method: 'POST', body: fd });
+    toast('Mot de passe réinitialisé');
+  });
+};
+
+window.toggleUser = async (id, actif) => {
+  try {
+    await api('/users/' + id, { method: 'PUT', body: { actif } });
+    toast(actif ? 'Compte activé' : 'Compte désactivé'); go('utilisateurs');
+  } catch (e) { toast(e.message, false); }
+};
+
+window.deleteUser = async (id) => {
+  const u = (await api('/users')).find((x) => x.id === id);
+  if (!u) return;
+  openModal(`
+    <div class="p-5">
+      <h3 class="font-bold text-lg text-marine-800 mb-2">Supprimer le compte</h3>
+      <p class="text-sm text-slate-600 mb-4">Supprimer définitivement le compte <b>${esc(u.email)}</b> ? L'action est tracée dans le journal.</p>
+      <div class="flex gap-2 justify-end">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg border">Annuler</button>
+        <button onclick="confirmDeleteUser(${id})" class="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold">Supprimer</button>
+      </div>
+    </div>`);
+};
+window.confirmDeleteUser = async (id) => {
+  try {
+    await api('/users/' + id, { method: 'DELETE' });
+    closeModal(); toast('Compte supprimé'); go('utilisateurs');
+  } catch (e) { closeModal(); toast(e.message, false); }
+};
+
+/* ---------- Mon compte (tous rôles) ---------- */
+RENDER.moncompte = async () => {
+  $('#header-actions').innerHTML = '';
+  const me = await api('/auth/me');
+  $('#view').innerHTML = `
+    <div class="max-w-lg space-y-6">
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="font-semibold text-marine-800 mb-3">Mes informations</div>
+        <dl class="text-sm space-y-2">
+          <div class="flex justify-between"><dt class="text-slate-500">Nom</dt><dd class="font-medium">${esc(me.nom || '—')}</dd></div>
+          <div class="flex justify-between"><dt class="text-slate-500">Email</dt><dd class="font-medium">${esc(me.email)}</dd></div>
+          <div class="flex justify-between"><dt class="text-slate-500">Rôle</dt><dd class="font-medium">${me.role === 'admin' ? 'Administrateur' : 'Moniteur'}</dd></div>
+        </dl>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="font-semibold text-marine-800 mb-3">Changer mon mot de passe</div>
+        <form id="form-pwd" class="space-y-3">
+          <div><label class="block text-sm font-medium mb-1">Mot de passe actuel</label>
+            <input name="ancien" type="password" required class="w-full border rounded-lg px-3 py-2" /></div>
+          <div><label class="block text-sm font-medium mb-1">Nouveau mot de passe (min. 6 caractères)</label>
+            <input name="nouveau" type="password" required minlength="6" class="w-full border rounded-lg px-3 py-2" /></div>
+          <div><label class="block text-sm font-medium mb-1">Confirmer le nouveau mot de passe</label>
+            <input name="confirme" type="password" required class="w-full border rounded-lg px-3 py-2" /></div>
+          <button type="submit" class="bg-brand hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-lg">Mettre à jour</button>
+        </form>
+      </div>
+    </div>`;
+  $('#form-pwd').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(e.target));
+    if (fd.nouveau !== fd.confirme) { toast('La confirmation ne correspond pas.', false); return; }
+    try {
+      await api('/auth/password', { method: 'POST', body: { ancien: fd.ancien, nouveau: fd.nouveau } });
+      toast('Mot de passe mis à jour ✅'); e.target.reset();
+    } catch (err) { toast(err.message, false); }
+  });
 };
 
 window.closeModal = closeModal;
@@ -740,10 +885,15 @@ async function devAutoLogin() {
   }
 }
 
-// Accès dev prioritaire : /app?dev=1 force toujours une connexion admin fraîche,
-// en ignorant un éventuel token périmé en localStorage. Sinon, reprise de session.
-if (new URLSearchParams(location.search).has('dev')) {
-  devAutoLogin();
-} else if (TOKEN && USER) {
-  api('/auth/me').then(showApp).catch(logout);
+// Démarrage : /app?dev=1 déclenche une connexion admin automatique — mais SEULEMENT
+// si le serveur l'autorise (DEV_ACCESS=1). En production (var absente), on retombe
+// sur l'écran de connexion normal. Sinon, reprise de session si un jeton valide existe.
+async function boot() {
+  if (new URLSearchParams(location.search).has('dev')) {
+    const cfg = await api('/config').catch(() => ({}));
+    if (cfg.devAccess) { devAutoLogin(); return; }
+    history.replaceState(null, '', '/app'); // accès dev désactivé → on nettoie l'URL
+  }
+  if (TOKEN && USER) api('/auth/me').then(showApp).catch(logout);
 }
+boot();
