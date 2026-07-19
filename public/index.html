@@ -61,17 +61,17 @@
   <!-- APPLICATION -->
   <div id="app" class="hidden min-h-screen md:flex">
     <!-- Sidebar -->
-    <aside id="sidebar" class="bg-marine-900 text-slate-200 w-64 flex-shrink-0 md:min-h-screen
-           fixed md:static inset-y-0 left-0 z-30 -translate-x-full md:translate-x-0 transition-transform">
-      <div class="p-5 border-b border-white/10 flex items-center gap-2">
+    <aside id="sidebar" class="bg-marine-900 text-slate-200 w-64 flex-shrink-0 flex flex-col
+           fixed md:sticky inset-y-0 md:top-0 left-0 md:h-screen z-30 -translate-x-full md:translate-x-0 transition-transform">
+      <div class="p-5 border-b border-white/10 flex items-center gap-2 flex-shrink-0">
         <span class="text-2xl">🚗</span>
         <div>
           <div class="font-bold leading-tight">Auto-École Béthel</div>
           <div class="text-xs text-slate-400">Lambaréné</div>
         </div>
       </div>
-      <nav id="nav" class="p-3 space-y-1 text-sm"></nav>
-      <div class="p-3 mt-auto absolute bottom-0 w-full border-t border-white/10">
+      <nav id="nav" class="p-3 space-y-1 text-sm flex-1 overflow-y-auto min-h-0"></nav>
+      <div class="p-3 border-t border-white/10 flex-shrink-0">
         <div id="user-box" class="text-xs text-slate-400 mb-2 px-2"></div>
         <button id="logout-btn" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-sm">
           ⎋ Déconnexion
